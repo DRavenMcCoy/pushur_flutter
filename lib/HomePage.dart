@@ -19,37 +19,38 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-/*
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-*/
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+
+    //THESE ARE TEST VALUES, SUBJECT TO CHANGE
+    List<int> alarms = [1,2,3,4,5,6,1,2,3,4,5,6,2,3,4,5,6,1,2,3,4,5,6];
+    List<int> timeAlarm = [1800,2359,0800,0600,1200,0000,1800,2359,0800,0600,1200,0000,2359,0800,0600,1200,0000,1800,2359,0800,0600,1200,0000,2359,0800,0600,1200,0000,1800,2359,0800,0600,1200,0000];
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
+      /*
+      body: new ListView.builder(
+          itemBuilder: (BuildContext context, int index){
+            return new Card(
+              child: const ListTile(
+                leading: const Icon(Icons.alarm),
+                title: const Text('3:00PM'),
+                subtitle: const Text('Go get food'),
+              ),
+            );
+          },
+      ),
+      */
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
+
         child: Column(
           // Column is also a layout widget. It takes a list of children and
           // arranges them vertically. By default, it sizes itself to fit its
@@ -67,6 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+
             const Text(
               'Push button for next screen',
             ),
@@ -74,6 +76,45 @@ class _MyHomePageState extends State<MyHomePage> {
               '',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+           //Evil process to display alarm list
+            Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.all(8),
+                  //Gets the length of the alarms list so it can iterate through for the alarm list
+                  //itemCount: alarms.length,
+                  //itemBuilder: (BuildContext context, int index) {
+
+                  //generates list of list tiles for the length of the alarms list
+                children: List.generate(
+                alarms.length,
+                 (index) => ListTile(
+                   //displays the alarm number and time on it (in 24hr format)
+                   title: Text('Alarm: ${alarms[index]} Alarm Time: ${timeAlarm[index]}'),
+                   //handles the tap events for alarms currently tells you what you clicked for testing purposes
+                   onTap: (){
+                     print('Alarm: ${alarms[index]} Alarm Time: ${timeAlarm[index]}');
+                   },
+                   //handles the on long press events for alarms
+                   onLongPress: (){
+
+                   },
+                 ),
+                 /*return Container(
+
+                    //Hyperinflated height for testing purposes (make smaller later)
+                    height: 400,
+                    margin: EdgeInsets.all(2),
+                    color: Colors.blue[400],
+                    child: Center(
+                      child: Text('Alarm number: ${alarms[index]} Alarm Time: (${timeAlarm[index]})',
+                        style: TextStyle(fontSize: 16),
+                    )
+                    ),
+                 );
+                   */
+                ),
+             )
+            )
           ],
         ),
       ),
@@ -102,5 +143,6 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+
   }
 }
