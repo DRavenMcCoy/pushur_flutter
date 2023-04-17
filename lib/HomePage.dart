@@ -69,13 +69,6 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
 
-            const Text(
-              'Push button for next screen',
-            ),
-            Text(
-              '',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
            //Evil process to display alarm list
             Expanded(
                 child: ListView(
@@ -87,7 +80,20 @@ class _MyHomePageState extends State<MyHomePage> {
                   //generates list of list tiles for the length of the alarms list
                 children: List.generate(
                 alarms.length,
-                 (index) => ListTile(
+                 (index) => Container(
+                   height: 400,
+                   margin: EdgeInsets.all(2),
+                   color: Colors.blue[400],
+                   child: MaterialButton(
+                       child: Text('Alarm number: ${alarms[index]} Alarm Time: (${timeAlarm[index]})',
+                         style: TextStyle(fontSize: 16),
+                       ),
+                     onPressed: (){
+                         print('Alarm number: ${alarms[index]} Alarm Time: (${timeAlarm[index]})');
+                     },
+                     onLongPress: (){},
+
+                   /*
                    //displays the alarm number and time on it (in 24hr format)
                    title: Text('Alarm: ${alarms[index]} Alarm Time: ${timeAlarm[index]}'),
                    //handles the tap events for alarms currently tells you what you clicked for testing purposes
@@ -98,6 +104,8 @@ class _MyHomePageState extends State<MyHomePage> {
                    onLongPress: (){
 
                    },
+
+                    */
                  ),
                  /*return Container(
 
@@ -114,6 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
                    */
                 ),
              )
+            )
             )
           ],
         ),
