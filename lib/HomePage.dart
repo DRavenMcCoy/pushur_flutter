@@ -27,8 +27,6 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
 
-    //THESE ARE TEST VALUES, SUBJECT TO CHANGE
-    final List<AlarmSettings> alarms = globals.alarmStart();
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -80,17 +78,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
                   //generates list of list tiles for the length of the alarms list
                 children: List.generate(
-                alarms.length,
+                globals.alarms.length,
                  (index) => Container(
                    height: 400,
                    margin: EdgeInsets.all(2),
                    color: Colors.blue[400],
                    child: MaterialButton(
-                       child: Text('Alarm number: ${alarms[index].id} Alarm Time: (${alarms[index].dateTime})',
+                       child: Text('Alarm number: ${globals.alarms[index].id} \nAlarm Time: (${globals.alarms[index].dateTime})\n Alarm Name: (${globals.alarms[index].notificationTitle}',
                          style: TextStyle(fontSize: 16),
                        ),
                      onPressed: (){
-                         print('Alarm number: ${alarms[index].id} Alarm Time: (${alarms[index].dateTime})');
+                         print('Alarm number: ${globals.alarms[index].id} Alarm Time: (${globals.alarms[index].dateTime})');
                      },
                      onLongPress: (){},
 

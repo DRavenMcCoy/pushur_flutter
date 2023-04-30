@@ -9,11 +9,11 @@ import 'AlarmsList.dart' as globals;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Alarm.init();
-
-  final List<AlarmSettings> alarms = globals.alarmStart();
+  
+  globals.alarmStart();
 
   //This sets the alarm
-  await Alarm.set(alarmSettings: alarms[0]);
+  await Alarm.set(alarmSettings: globals.alarms[0]);
 
   runApp(const MyApp());
 }
