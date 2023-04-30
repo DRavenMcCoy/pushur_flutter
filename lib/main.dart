@@ -4,26 +4,16 @@ import 'dart:async';
 import 'Alarm.dart';
 import 'HomePage.dart';
 import 'Settings.dart';
+import 'AlarmsList.dart' as globals;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Alarm.init();
 
-  //This is a test value for an alarm
-  final alarmSettings = AlarmSettings(
-    id: 1,
-                     //YY,MM,DD,HH,Min
-    dateTime: DateTime(2023,4,29,17,25,0,0,0),
-    assetAudioPath: 'assets/alarm.mp3',
-    loopAudio: false,
-    vibrate: true,
-    fadeDuration: 3.0,
-    notificationTitle: 'ALARM',
-    notificationBody: 'IT IS WORKING',
-    enableNotificationOnKill: true,
-  );
+  final List<AlarmSettings> alarms = globals.alarmStart();
+
   //This sets the alarm
-  await Alarm.set(alarmSettings: alarmSettings);
+  await Alarm.set(alarmSettings: alarms[0]);
 
   runApp(const MyApp());
 }

@@ -1,4 +1,6 @@
+import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
+import 'AlarmsList.dart' as globals;
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -26,8 +28,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // than having to individually change instances of widgets.
 
     //THESE ARE TEST VALUES, SUBJECT TO CHANGE
-    List<int> alarms = [1,2,3,4,5,6,1,2,3,4,5,6,2,3,4,5,6,1,2,3,4,5,6];
-    List<int> timeAlarm = [1800,2359,0800,0600,1200,0000,1800,2359,0800,0600,1200,0000,2359,0800,0600,1200,0000,1800,2359,0800,0600,1200,0000,2359,0800,0600,1200,0000,1800,2359,0800,0600,1200,0000];
+    final List<AlarmSettings> alarms = globals.alarmStart();
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -85,11 +86,11 @@ class _MyHomePageState extends State<MyHomePage> {
                    margin: EdgeInsets.all(2),
                    color: Colors.blue[400],
                    child: MaterialButton(
-                       child: Text('Alarm number: ${alarms[index]} Alarm Time: (${timeAlarm[index]})',
+                       child: Text('Alarm number: ${alarms[index].id} Alarm Time: (${alarms[index].dateTime})',
                          style: TextStyle(fontSize: 16),
                        ),
                      onPressed: (){
-                         print('Alarm number: ${alarms[index]} Alarm Time: (${timeAlarm[index]})');
+                         print('Alarm number: ${alarms[index].id} Alarm Time: (${alarms[index].dateTime})');
                      },
                      onLongPress: (){},
 
