@@ -11,9 +11,9 @@ Future<void> main() async {
   await Alarm.init();
   
   globals.alarmStart();
-
+  globals.createAlarmAddList(3,DateTime(2023,4,30,22,54,0),'na', false, true, 3.0, 'DYNAMICALLY MADE', 'LETS GOOO');
   //This sets the alarm
-  await Alarm.set(alarmSettings: globals.alarms[0]);
+  await Alarm.set(alarmSettings: globals.alarms[2]);
 
   runApp(const MyApp());
 }
