@@ -1,131 +1,107 @@
+import 'dart:async';
 import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
-import 'AlarmsList.dart' as globals;
+import 'package:pushur_flutter/Alarm.dart';
+
+import 'Settings.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+  const MyHomePage({Key? key}) : super(key: key);
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  //Subscription for listening, and alarms is so we can see how many alarms we have and place them
+  late List<AlarmSettings> alarms;
+  static StreamSubscription? subscription;
+
+  //self-explanatory
+  @override
+  void initState(){
+    super.initState();
+    loadAlarm();
+    //This will do a callback when an alarm rings, may add later
+    //subscription ??= Alarm.ringStream.stream.listen((alarmSettings) =>  { })
+  }
+
+  //loads alarms into list
+  void loadAlarm(){
+    setState(() {
+      alarms = Alarm.getAlarms();
+      alarms.sort((a, b) => a.dateTime.isBefore(b.dateTime) ? 0 : 1);
+    });
+  }
+
+  //Disposes of subscription
+  @override
+  void dispose(){
+    subscription?.cancel();
+    super.dispose();
+  }
+
+  Future<void> navigateToAlarmScreen(AlarmSettings? settings) async {
+    final res = await showModalBottomSheet<bool?>(
+        context: context,
+        isScrollControlled: true,
+        /*
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+
+         */
+        builder: (context) {
+          return AddAlarm(alarmSettings: settings);
+          //return FractionallySizedBox(
+           // heightFactor: 0.6,
+            //child: AddAlarm(alarmSettings: settings),
+          //);
+        });
+
+    if (res != null && res == true) loadAlarm();
+  }
+
   @override
   Widget build(BuildContext context) {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
 
+    //Some of this is inspired by the example provided in the Alarm library
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      /*
-      body: new ListView.builder(
-          itemBuilder: (BuildContext context, int index){
-            return new Card(
-              child: const ListTile(
-                leading: const Icon(Icons.alarm),
-                title: const Text('3:00PM'),
-                subtitle: const Text('Go get food'),
-              ),
-            );
-          },
-      ),
-      */
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-
-           //Evil process to display alarm list
-            Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.all(8),
-                  //Gets the length of the alarms list so it can iterate through for the alarm list
-                  //itemCount: alarms.length,
-                  //itemBuilder: (BuildContext context, int index) {
-
-                  //generates list of list tiles for the length of the alarms list
-                children: List.generate(
-                globals.alarms.length,
-                 (index) => Container(
-                   height: 400,
-                   margin: EdgeInsets.all(2),
-                   color: Colors.blue[400],
-                   child: MaterialButton(
-                       child: Text('Alarm number: ${globals.alarms[index].id} \nAlarm Time: (${globals.alarms[index].dateTime})\n Alarm Name: (${globals.alarms[index].notificationTitle}',
-                         style: TextStyle(fontSize: 16),
-                       ),
-                     onPressed: (){
-                         print('Alarm number: ${globals.alarms[index].id} Alarm Time: (${globals.alarms[index].dateTime})');
-                     },
-                     onLongPress: (){},
-
-                   /*
-                   //displays the alarm number and time on it (in 24hr format)
-                   title: Text('Alarm: ${alarms[index]} Alarm Time: ${timeAlarm[index]}'),
-                   //handles the tap events for alarms currently tells you what you clicked for testing purposes
-                   onTap: (){
-                     print('Alarm: ${alarms[index]} Alarm Time: ${timeAlarm[index]}');
-                   },
-                   //handles the on long press events for alarms
-                   onLongPress: (){
-
-                   },
-
-                    */
-                 ),
-                 /*return Container(
-
-                    //Hyperinflated height for testing purposes (make smaller later)
-                    height: 400,
-                    margin: EdgeInsets.all(2),
-                    color: Colors.blue[400],
-                    child: Center(
-                      child: Text('Alarm number: ${alarms[index]} Alarm Time: (${timeAlarm[index]})',
-                        style: TextStyle(fontSize: 16),
-                    )
+        appBar: AppBar(title: const Text('Alarm app')),
+        body: SafeArea(
+            child: alarms.isNotEmpty
+                ? ListView.separated(
+                itemCount: alarms.length,
+                separatorBuilder: (context, index) => const Divider(),
+                itemBuilder: (context, index){
+                  //This will be how every container for each alarm is created
+                  return Container(
+                    key: Key(alarms[index].id.toString()),
+                    height: 200,
+                    margin: const EdgeInsets.all(2),
+                    color: Colors.blue[200],
+                    child: MaterialButton(
+                      child: Text('Alarm Time: ${alarms[index].dateTime.hour}:'
+                          '${alarms[index].dateTime.minute} \nAlarm Name: ${alarms[index].notificationTitle}',
+                          style: const TextStyle(fontSize: 24),
+                      ),
+                        onPressed: () => navigateToAlarmScreen(alarms[index])
                     ),
-                 );
-                   */
-                ),
-             )
+                  );
+                },
             )
-            )
-          ],
+                : Center(
+              child: Text(
+                "No Alarms",
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
         ),
-      ),
+      //These are for the floating action buttons that allow you to add alarms or change settings
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Padding(
         padding: const EdgeInsets.all(32.0),
@@ -134,22 +110,26 @@ class _MyHomePageState extends State<MyHomePage> {
 
           children: <Widget>[
             FloatingActionButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/third');
+              onPressed: () async {
+                await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const SettingsMenu(),
+                    ));
               },
               tooltip: 'NextScreen',
               child: const Icon(Icons.settings),
             ),
             FloatingActionButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/second');
-              },
+              onPressed: () => navigateToAlarmScreen(null),
               tooltip: 'NextScreen',
               child: const Icon(Icons.add),
-            ),
-          ],
-        ),
-      ),
+            )
+
+          ]
+        )
+      )
     );
 
   }

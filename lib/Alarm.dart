@@ -1,22 +1,241 @@
+import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 
 class AddAlarm extends StatefulWidget {
-  const AddAlarm({super.key, required this.title});
+  //  const AddAlarm({super.key, required this.title});
+  final AlarmSettings? alarmSettings;
+  const AddAlarm({Key? key, this.alarmSettings})
+      : super(key: key);
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+  //final String title;
 
   @override
-  State<AddAlarm> createState() => _AddAlarmState();
+  State<AddAlarm> createState() => _ExampleAlarmEditScreenState();
 }
+
+class _ExampleAlarmEditScreenState extends State<AddAlarm> {
+  late bool creating;
+
+  late TimeOfDay selectedTime;
+  late bool loopAudio;
+  late bool vibrate;
+  late bool showNotification;
+  late String assetAudio;
+
+  @override
+  void initState() {
+    super.initState();
+    creating = widget.alarmSettings == null;
+
+    if (creating) {
+      final dt = DateTime.now().add(const Duration(minutes: 1));
+      selectedTime = TimeOfDay(hour: dt.hour, minute: dt.minute);
+      loopAudio = true;
+      vibrate = true;
+      showNotification = true;
+      assetAudio = 'assets/mozart.mp3';
+    } else {
+      selectedTime = TimeOfDay(
+        hour: widget.alarmSettings!.dateTime.hour,
+        minute: widget.alarmSettings!.dateTime.minute,
+      );
+      loopAudio = widget.alarmSettings!.loopAudio;
+      vibrate = widget.alarmSettings!.vibrate;
+      showNotification = widget.alarmSettings!.notificationTitle != null &&
+          widget.alarmSettings!.notificationTitle!.isNotEmpty &&
+          widget.alarmSettings!.notificationBody != null &&
+          widget.alarmSettings!.notificationBody!.isNotEmpty;
+      assetAudio = widget.alarmSettings!.assetAudioPath;
+    }
+  }
+
+  Future<void> pickTime() async {
+    final res = await showTimePicker(
+      initialTime: selectedTime,
+      context: context,
+    );
+    if (res != null) setState(() => selectedTime = res);
+  }
+
+  AlarmSettings buildAlarmSettings() {
+    final now = DateTime.now();
+    final id = creating
+        ? DateTime.now().millisecondsSinceEpoch % 100000
+        : widget.alarmSettings!.id;
+
+    DateTime dateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      selectedTime.hour,
+      selectedTime.minute,
+      0,
+      0,
+    );
+    if (dateTime.isBefore(DateTime.now())) {
+      dateTime = dateTime.add(const Duration(days: 1));
+    }
+
+    final alarmSettings = AlarmSettings(
+      id: id,
+      dateTime: dateTime,
+      loopAudio: loopAudio,
+      vibrate: vibrate,
+      notificationTitle: showNotification ? 'Alarm example' : null,
+      notificationBody: showNotification ? 'Your alarm ($id) is ringing' : null,
+      assetAudioPath: assetAudio,
+      stopOnNotificationOpen: false,
+    );
+    return alarmSettings;
+  }
+
+  void saveAlarm() {
+    Alarm.set(alarmSettings: buildAlarmSettings())
+        .then((_) => Navigator.pop(context, true));
+  }
+
+  Future<void> deleteAlarm() async {
+    Alarm.stop(widget.alarmSettings!.id)
+        .then((_) => Navigator.pop(context, true));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 30),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(
+                  "Cancel",
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge!
+                      .copyWith(color: Colors.blueAccent),
+                ),
+              ),
+              TextButton(
+                onPressed: saveAlarm,
+                child: Text(
+                  "Save",
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge!
+                      .copyWith(color: Colors.blueAccent),
+                ),
+              ),
+            ],
+          ),
+          RawMaterialButton(
+            onPressed: pickTime,
+            fillColor: Colors.grey[200],
+            child: Container(
+              margin: const EdgeInsets.all(20),
+              child: Text(
+                selectedTime.format(context),
+                style: Theme.of(context)
+                    .textTheme
+                    .displayMedium!
+                    .copyWith(color: Colors.blueAccent),
+              ),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Loop alarm audio',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              Switch(
+                value: loopAudio,
+                onChanged: (value) => setState(() => loopAudio = value),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Vibrate',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              Switch(
+                value: vibrate,
+                onChanged: (value) => setState(() => vibrate = value),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Show notification',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              Switch(
+                value: showNotification,
+                onChanged: (value) => setState(() => showNotification = value),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Sound',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              DropdownButton(
+                value: assetAudio,
+                items: const [
+                  DropdownMenuItem<String>(
+                    value: 'assets/mozart.mp3',
+                    child: Text('Mozart'),
+                  ),
+                  DropdownMenuItem<String>(
+                    value: 'assets/nokia.mp3',
+                    child: Text('Nokia'),
+                  ),
+                  DropdownMenuItem<String>(
+                    value: 'assets/one_piece.mp3',
+                    child: Text('One Piece'),
+                  ),
+                  DropdownMenuItem<String>(
+                    value: 'assets/star_wars.mp3',
+                    child: Text('Star Wars'),
+                  ),
+                ],
+                onChanged: (value) => setState(() => assetAudio = value!),
+              ),
+            ],
+          ),
+          if (!creating)
+            TextButton(
+              onPressed: deleteAlarm,
+              child: Text(
+                'Delete Alarm',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium!
+                    .copyWith(color: Colors.red),
+              ),
+            ),
+          const SizedBox(),
+        ],
+      ),
+    );
+  }
+}
+
+
+/*
 enum NotificationType {alarm, notification}
 
 class _AddAlarmState extends State<AddAlarm> {
@@ -133,7 +352,7 @@ class _AddAlarmState extends State<AddAlarm> {
             FloatingActionButton.extended(
               isExtended: true,
               onPressed: () {
-                Navigator.pushNamed(context, '/');
+                Navigator.pop(context, '/');
               },
               tooltip: 'Cancel',
               label: const Text("Cancel"),
@@ -141,7 +360,8 @@ class _AddAlarmState extends State<AddAlarm> {
             ),
             FloatingActionButton.extended(
               onPressed: () {
-                Navigator.pushNamed(context, '/');
+
+                Navigator.pop(context, '/');
               },
               tooltip: 'Save',
               label: const Text("Save"),
@@ -152,3 +372,4 @@ class _AddAlarmState extends State<AddAlarm> {
     );
   }
 }
+ */
