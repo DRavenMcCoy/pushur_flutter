@@ -4,20 +4,16 @@ import 'package:flutter/material.dart';
 class AddAlarm extends StatefulWidget {
   //  const AddAlarm({super.key, required this.title});
   final AlarmSettings? alarmSettings;
-  const AddAlarm({Key? key, this.alarmSettings})
-      : super(key: key);
 
-
-  //final String title;
+  const AddAlarm({Key? key, this.alarmSettings}) : super(key: key);
 
   @override
-  State<AddAlarm> createState() => _ExampleAlarmEditScreenState();
+  State<AddAlarm> createState() => _AlarmEditScreenState();
 }
 
-
-
-class _ExampleAlarmEditScreenState extends State<AddAlarm> {
-  final myController = TextEditingController();
+class _AlarmEditScreenState extends State<AddAlarm> {
+  // Value and important tools declaration
+  final nameInputController = TextEditingController();
   late bool creating;
   late TimeOfDay selectedTime;
   late bool loopAudio;
@@ -26,11 +22,9 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
   late String assetAudio;
   late String alarmName;
 
-
-
   @override
   void initState() {
-
+    // Setting up default Alarm Settings
     super.initState();
     creating = widget.alarmSettings == null;
 
@@ -40,7 +34,7 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
       loopAudio = true;
       vibrate = true;
       showNotification = true;
-      assetAudio = 'assets/mozart.mp3';
+      assetAudio = '';
       alarmName = "Example Alarm";
     } else {
       selectedTime = TimeOfDay(
@@ -57,14 +51,15 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
     }
   }
 
-   _setAlarmName() {
+  _setAlarmName() {
+    // Method for setting the name of the generated Alarm
     setState(() {
-      alarmName = myController.text;
+      alarmName = nameInputController.text;
     });
   }
 
-
   Future<void> pickTime() async {
+    // Method for setting the timing of the generated Alarm
     final res = await showTimePicker(
       initialTime: selectedTime,
       context: context,
@@ -73,6 +68,7 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
   }
 
   AlarmSettings buildAlarmSettings() {
+    // Method for building the parameters of the generated Alarm
 
     final now = DateTime.now();
 
@@ -90,16 +86,19 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
       0,
     );
     if (dateTime.isBefore(DateTime.now())) {
+      // Adding one because the dates are saved to arrays, which start at 0
       dateTime = dateTime.add(const Duration(days: 1));
     }
 
     final alarmSettings = AlarmSettings(
+      // Method for finalising the Alarm's settings
       id: id,
       dateTime: dateTime,
       loopAudio: loopAudio,
       vibrate: vibrate,
       notificationTitle: showNotification ? alarmName : null,
-      notificationBody: showNotification ? 'Your alarm ($id) is ringing' : null,
+      notificationBody:
+          showNotification ? 'Your alarm ($alarmName) is ringing' : null,
       assetAudioPath: assetAudio,
       stopOnNotificationOpen: false,
     );
@@ -107,26 +106,26 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
   }
 
   void saveAlarm() {
+    // Method for saving the generated Alarm
     Alarm.set(alarmSettings: buildAlarmSettings())
         .then((_) => Navigator.pop(context, true));
   }
 
   Future<void> deleteAlarm() async {
+    // Method for deleting the generated Alarm
     Alarm.stop(widget.alarmSettings!.id)
         .then((_) => Navigator.pop(context, true));
   }
 
-
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
-    myController.dispose();
+    nameInputController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 30),
       child: Column(
@@ -136,6 +135,7 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TextButton(
+                // Cancel making new alarm and go back button
                 onPressed: () => Navigator.pop(context, false),
                 child: Text(
                   "Cancel",
@@ -146,6 +146,7 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
                 ),
               ),
               TextButton(
+                // Generate current alarm and save button
                 onPressed: saveAlarm,
                 child: Text(
                   "Save",
@@ -157,19 +158,17 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
               ),
             ],
           ),
-
-
-
           TextField(
-            controller: myController,
-              decoration: const InputDecoration(
+            // Alarm name input field
+            controller: nameInputController,
+            decoration: const InputDecoration(
               border: OutlineInputBorder(),
               hintText: 'Enter an alarm name',
             ),
             onChanged: _setAlarmName(),
           ),
-
           RawMaterialButton(
+            // Time picker button, looks like a digital clock
             onPressed: pickTime,
             fillColor: Colors.grey[200],
             child: Container(
@@ -187,19 +186,7 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Loop alarm',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              Switch(
-                value: loopAudio,
-                onChanged: (value) => setState(() => loopAudio = value),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
+                // Vibration toggle switch
                 'Vibrate',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
@@ -213,6 +200,7 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
+                // Vibration toggle switch
                 'Show notification',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
@@ -222,9 +210,9 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
               ),
             ],
           ),
-
           if (!creating)
             TextButton(
+              // Button for deleting an already generated alarm
               onPressed: deleteAlarm,
               child: Text(
                 'Delete Alarm',
@@ -240,7 +228,6 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
     );
   }
 }
-
 
 /*
 enum NotificationType {alarm, notification}
