@@ -78,20 +78,92 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemCount: alarms.length,
                 separatorBuilder: (context, index) => const Divider(),
                 itemBuilder: (context, index){
+                  //The next few lines solve an issue with integers, as a leading "0" is not mathematically significant they are removed when converting to string
+                  //These work by finding if the int is lower than 2, if so then we add a leading 0
+                  String minutes = alarms[index].dateTime.minute.toString();
+                  if(minutes.length < 2) {
+                    String temp = '0$minutes';
+                    minutes = temp;
+                  }
                   //This will be how every container for each alarm is created
-                  return Container(
-                    key: Key(alarms[index].id.toString()),
-                    height: 200,
-                    margin: const EdgeInsets.all(2),
-                    color: Colors.blue[200],
-                    child: MaterialButton(
-                      child: Text('Alarm Time: ${alarms[index].dateTime.hour}:'
-                          '${alarms[index].dateTime.minute} \nAlarm Name: ${alarms[index].notificationTitle}',
-                          style: const TextStyle(fontSize: 24),
+                  //Decides if the alarm needs to be in AM or PM based on if it is after 12
+                  if(alarms[index].dateTime.hour > 12) {
+
+                    return Container(
+                      key: Key(alarms[index].id.toString()),
+                      height: 200,
+                      margin: const EdgeInsets.all(2),
+                      color: Colors.blue[200],
+                      child: MaterialButton(
+                          child: Text(
+                            'Alarm Time: ${alarms[index].dateTime.hour - 12}:'
+                                '$minutes PM \nAlarm Name: ${alarms[index]
+                                .notificationTitle}',
+                            style: const TextStyle(fontSize: 24),
+                          ),
+                          onPressed: () => navigateToAlarmScreen(alarms[index])
                       ),
-                        onPressed: () => navigateToAlarmScreen(alarms[index])
-                    ),
-                  );
+                    );
+                  }
+
+                  //If it is equal to 12 no need to subtract
+                  else if(alarms[index].dateTime.hour == 12) {
+                    return Container(
+                      key: Key(alarms[index].id.toString()),
+                      height: 200,
+                      margin: const EdgeInsets.all(2),
+                      color: Colors.blue[200],
+                      child: MaterialButton(
+                          child: Text(
+                            'Alarm Time: ${alarms[index].dateTime.hour}:'
+                                '$minutes PM \nAlarm Name: ${alarms[index]
+                                .notificationTitle}',
+                            style: const TextStyle(fontSize: 24),
+                          ),
+                          onPressed: () => navigateToAlarmScreen(alarms[index])
+                      ),
+                    );
+                  }
+
+                  //If it is 12 AM it would appear as 00:00 24-hour clock, so this must be fixed
+                  else if(alarms[index].dateTime.hour == 0){
+
+                    return Container(
+                      key: Key(alarms[index].id.toString()),
+                      height: 200,
+                      margin: const EdgeInsets.all(2),
+                      color: Colors.blue[200],
+                      child: MaterialButton(
+                          child: Text(
+                            'Alarm Time: 12:'
+                                '$minutes AM \nAlarm Name: ${alarms[index]
+                                .notificationTitle}',
+                            style: const TextStyle(fontSize: 24),
+                          ),
+                          onPressed: () => navigateToAlarmScreen(alarms[index])
+                      ),
+                    );
+                  }
+
+                  //If it is not past 12 and it is not 12 then it must be the AMs
+                  else{
+
+                    return Container(
+                      key: Key(alarms[index].id.toString()),
+                      height: 200,
+                      margin: const EdgeInsets.all(2),
+                      color: Colors.blue[200],
+                      child: MaterialButton(
+                          child: Text(
+                            'Alarm Time: ${alarms[index].dateTime.hour}:'
+                                '$minutes AM \nAlarm Name: ${alarms[index]
+                                .notificationTitle}',
+                            style: const TextStyle(fontSize: 24),
+                          ),
+                          onPressed: () => navigateToAlarmScreen(alarms[index])
+                      ),
+                    );
+                  }
                 },
             )
                 : Center(
