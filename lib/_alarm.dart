@@ -15,12 +15,21 @@ class _AlarmEditScreenState extends State<AddAlarm> {
   // Value and important tools declaration
   final nameInputController = TextEditingController();
   late bool creating;
-  late TimeOfDay selectedTime;
+  late DateTime selectedTime;
   late bool loopAudio;
   late bool vibrate;
   late bool showNotification;
   late String assetAudio;
   late String alarmName;
+  late int year = 2023;
+  late int month = 5;
+  late int day = 4;
+  late int hour = 12;
+  late int minute = 30;
+  late int second = 0;
+  late int millisecond = 0;
+  late int microsecond = 0;
+  late TimeOfDay hourAndMinute = TimeOfDay(hour: hour, minute: minute);
 
   @override
   void initState() {
@@ -30,16 +39,20 @@ class _AlarmEditScreenState extends State<AddAlarm> {
 
     if (creating) {
       final dt = DateTime.now().add(const Duration(minutes: 1));
-      selectedTime = TimeOfDay(hour: dt.hour, minute: dt.minute);
+      selectedTime = DateTime(year = dt.year, month = dt.month, day = dt.day, hour = dt.hour, minute = dt.minute, second, millisecond, microsecond);
+      hourAndMinute = TimeOfDay(hour: hour, minute: minute);
       loopAudio = true;
       vibrate = true;
       showNotification = true;
-      assetAudio = '';
+      assetAudio = 'assets/mozart.mp3';
       alarmName = "Example Alarm";
     } else {
-      selectedTime = TimeOfDay(
-        hour: widget.alarmSettings!.dateTime.hour,
-        minute: widget.alarmSettings!.dateTime.minute,
+      selectedTime = DateTime(
+        year = widget.alarmSettings!.dateTime.year,
+        month = widget.alarmSettings!.dateTime.month,
+        day = widget.alarmSettings!.dateTime.day,
+        hour = widget.alarmSettings!.dateTime.hour,
+        minute = widget.alarmSettings!.dateTime.minute,
       );
       loopAudio = widget.alarmSettings!.loopAudio;
       vibrate = widget.alarmSettings!.vibrate;
@@ -61,7 +74,18 @@ class _AlarmEditScreenState extends State<AddAlarm> {
   Future<void> pickTime() async {
     // Method for setting the timing of the generated Alarm
     final res = await showTimePicker(
-      initialTime: selectedTime,
+      initialTime: hourAndMinute,
+      context: context,
+    );
+    if (res != null) setState(() => hourAndMinute = res);
+  }
+
+  Future<void> pickDate() async {
+    // Method for setting the timing of the generated Alarm
+    final res = await showDatePicker(
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(4000,12,31),
       context: context,
     );
     if (res != null) setState(() => selectedTime = res);
@@ -69,22 +93,22 @@ class _AlarmEditScreenState extends State<AddAlarm> {
 
   AlarmSettings buildAlarmSettings() {
     // Method for building the parameters of the generated Alarm
-
-    final now = DateTime.now();
-
     final id = creating
         ? DateTime.now().millisecondsSinceEpoch % 100000
         : widget.alarmSettings!.id;
 
     DateTime dateTime = DateTime(
-      now.year,
-      now.month,
-      now.day,
+      selectedTime.year,
+      selectedTime.month,
+      selectedTime.day,
       selectedTime.hour,
       selectedTime.minute,
       0,
       0,
     );
+
+    hourAndMinute = TimeOfDay(hour: hour, minute: minute);
+
     if (dateTime.isBefore(DateTime.now())) {
       // Adding one because the dates are saved to arrays, which start at 0
       dateTime = dateTime.add(const Duration(days: 1));
@@ -167,14 +191,16 @@ class _AlarmEditScreenState extends State<AddAlarm> {
             ),
             onChanged: _setAlarmName(),
           ),
+
+
           RawMaterialButton(
             // Time picker button, looks like a digital clock
-            onPressed: pickTime,
+            onPressed: pickDate,
             fillColor: Colors.grey[200],
             child: Container(
               margin: const EdgeInsets.all(20),
               child: Text(
-                selectedTime.format(context),
+                selectedTime.month.toString() + "/" + selectedTime.day.toString() + "/" + selectedTime.year.toString(),
                 style: Theme.of(context)
                     .textTheme
                     .displayMedium!
@@ -182,6 +208,28 @@ class _AlarmEditScreenState extends State<AddAlarm> {
               ),
             ),
           ),
+
+          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            RawMaterialButton(
+              // Time picker button, looks like a digital clock
+              onPressed: pickTime,
+              fillColor: Colors.grey[200],
+              child: Container(
+                margin: const EdgeInsets.all(20),
+                child: Text(
+                  hourAndMinute.format(context),
+                  style: Theme.of(context)
+                      .textTheme
+                      .displayMedium!
+                      .copyWith(color: Colors.blueAccent),
+                ),
+              ),
+            ),
+
+          ]),
+
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
