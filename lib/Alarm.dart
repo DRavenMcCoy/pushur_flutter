@@ -14,17 +14,23 @@ class AddAlarm extends StatefulWidget {
   State<AddAlarm> createState() => _ExampleAlarmEditScreenState();
 }
 
-class _ExampleAlarmEditScreenState extends State<AddAlarm> {
-  late bool creating;
 
+
+class _ExampleAlarmEditScreenState extends State<AddAlarm> {
+  final myController = TextEditingController();
+  late bool creating;
   late TimeOfDay selectedTime;
   late bool loopAudio;
   late bool vibrate;
   late bool showNotification;
   late String assetAudio;
+  late String alarmName;
+
+
 
   @override
   void initState() {
+
     super.initState();
     creating = widget.alarmSettings == null;
 
@@ -35,6 +41,7 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
       vibrate = true;
       showNotification = true;
       assetAudio = 'assets/mozart.mp3';
+      alarmName = "Example Alarm";
     } else {
       selectedTime = TimeOfDay(
         hour: widget.alarmSettings!.dateTime.hour,
@@ -50,6 +57,13 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
     }
   }
 
+   _setAlarmName() {
+    setState(() {
+      alarmName = myController.text;
+    });
+  }
+
+
   Future<void> pickTime() async {
     final res = await showTimePicker(
       initialTime: selectedTime,
@@ -59,7 +73,9 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
   }
 
   AlarmSettings buildAlarmSettings() {
+
     final now = DateTime.now();
+
     final id = creating
         ? DateTime.now().millisecondsSinceEpoch % 100000
         : widget.alarmSettings!.id;
@@ -82,7 +98,7 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
       dateTime: dateTime,
       loopAudio: loopAudio,
       vibrate: vibrate,
-      notificationTitle: showNotification ? 'Alarm example' : null,
+      notificationTitle: showNotification ? alarmName : null,
       notificationBody: showNotification ? 'Your alarm ($id) is ringing' : null,
       assetAudioPath: assetAudio,
       stopOnNotificationOpen: false,
@@ -100,10 +116,19 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
         .then((_) => Navigator.pop(context, true));
   }
 
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    myController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 30),
+      padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 30),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -117,7 +142,7 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
                   style: Theme.of(context)
                       .textTheme
                       .titleLarge!
-                      .copyWith(color: Colors.blueAccent),
+                      .copyWith(color: Colors.redAccent),
                 ),
               ),
               TextButton(
@@ -127,11 +152,23 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
                   style: Theme.of(context)
                       .textTheme
                       .titleLarge!
-                      .copyWith(color: Colors.blueAccent),
+                      .copyWith(color: Colors.green),
                 ),
               ),
             ],
           ),
+
+
+
+          TextField(
+            controller: myController,
+              decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Enter an alarm name',
+            ),
+            onChanged: _setAlarmName(),
+          ),
+
           RawMaterialButton(
             onPressed: pickTime,
             fillColor: Colors.grey[200],
@@ -150,7 +187,7 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Loop alarm audio',
+                'Loop alarm',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               Switch(
@@ -185,37 +222,7 @@ class _ExampleAlarmEditScreenState extends State<AddAlarm> {
               ),
             ],
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Sound',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              DropdownButton(
-                value: assetAudio,
-                items: const [
-                  DropdownMenuItem<String>(
-                    value: 'assets/mozart.mp3',
-                    child: Text('Mozart'),
-                  ),
-                  DropdownMenuItem<String>(
-                    value: 'assets/nokia.mp3',
-                    child: Text('Nokia'),
-                  ),
-                  DropdownMenuItem<String>(
-                    value: 'assets/one_piece.mp3',
-                    child: Text('One Piece'),
-                  ),
-                  DropdownMenuItem<String>(
-                    value: 'assets/star_wars.mp3',
-                    child: Text('Star Wars'),
-                  ),
-                ],
-                onChanged: (value) => setState(() => assetAudio = value!),
-              ),
-            ],
-          ),
+
           if (!creating)
             TextButton(
               onPressed: deleteAlarm,
