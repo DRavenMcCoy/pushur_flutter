@@ -5,6 +5,7 @@ import 'package:pushur_flutter/_alarm.dart';
 
 import 'settings.dart';
 
+//Much of this is made with the consideration of how the alarm library works, other iterations have been tried prior however other iterations ran into fatal errors (week of progress lost)
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
 
@@ -42,6 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
+  //Does exactly what the function is named after
   Future<void> navigateToAlarmScreen(AlarmSettings? settings) async {
     final res = await showModalBottomSheet<bool?>(
         context: context,
@@ -88,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   //This will be how every container for each alarm is created
                   //Decides if the alarm needs to be in AM or PM based on if it is after 12
                   if(alarms[index].dateTime.hour > 12) {
-
+                  //makes the container holding the alarm information, along with all relevant information. All other 'return Container' instances in this script do similarly as such I will not comment on them
                     return Container(
                       key: Key(alarms[index].id.toString()),
                       height: 200,
