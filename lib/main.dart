@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:alarm/alarm.dart';
 import 'dart:async';
-import 'Alarm.dart';
-import 'HomePage.dart';
-import 'Settings.dart';
+import '_alarm.dart';
+import 'homepage.dart';
+import 'settings.dart';
 
 //Has to be async for Alarm.init(); to work
 Future<void> main() async {

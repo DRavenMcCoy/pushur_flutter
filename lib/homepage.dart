@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
-import 'package:pushur_flutter/Alarm.dart';
+import 'package:pushur_flutter/_alarm.dart';
 
-import 'Settings.dart';
+import 'settings.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
