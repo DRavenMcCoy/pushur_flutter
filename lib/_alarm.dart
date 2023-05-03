@@ -41,10 +41,10 @@ class _AlarmEditScreenState extends State<AddAlarm> {
       final dt = DateTime.now().add(const Duration(minutes: 1));
       selectedTime = DateTime(year = dt.year, month = dt.month, day = dt.day, hour = dt.hour, minute = dt.minute, second, millisecond, microsecond);
       hourAndMinute = TimeOfDay(hour: hour, minute: minute);
-      loopAudio = true;
+      loopAudio = false;
       vibrate = true;
       showNotification = true;
-      assetAudio = 'assets/mozart.mp3';
+      assetAudio = 'assets/silence.mp3';
       alarmName = "Example Alarm";
     } else {
       selectedTime = DateTime(
@@ -67,7 +67,12 @@ class _AlarmEditScreenState extends State<AddAlarm> {
   _setAlarmName() {
     // Method for setting the name of the generated Alarm
     setState(() {
-      alarmName = nameInputController.text;
+      if(nameInputController.text == ""){
+        alarmName = "No Name";
+      }
+      else {
+        alarmName = nameInputController.text;
+      }
     });
   }
 
@@ -83,7 +88,7 @@ class _AlarmEditScreenState extends State<AddAlarm> {
   Future<void> pickDate() async {
     // Method for setting the timing of the generated Alarm
     final res = await showDatePicker(
-      initialDate: DateTime.now(),
+      initialDate: selectedTime,
       firstDate: DateTime.now(),
       lastDate: DateTime(4000,12,31),
       context: context,
@@ -97,25 +102,31 @@ class _AlarmEditScreenState extends State<AddAlarm> {
         ? DateTime.now().millisecondsSinceEpoch % 100000
         : widget.alarmSettings!.id;
 
+    print('Full alarm in MM/DD/YY : HH/MM format ${selectedTime.month}/${selectedTime.day}/${selectedTime.year}');
+
     DateTime dateTime = DateTime(
       selectedTime.year,
       selectedTime.month,
       selectedTime.day,
-      selectedTime.hour,
-      selectedTime.minute,
+      hourAndMinute.hour,
+      hourAndMinute.minute,
+      0,
       0,
       0,
     );
 
     hourAndMinute = TimeOfDay(hour: hour, minute: minute);
 
+
     if (dateTime.isBefore(DateTime.now())) {
       // Adding one because the dates are saved to arrays, which start at 0
+      print('DURATION CHANGED');
       dateTime = dateTime.add(const Duration(days: 1));
     }
 
     final alarmSettings = AlarmSettings(
       // Method for finalising the Alarm's settings
+
       id: id,
       dateTime: dateTime,
       loopAudio: loopAudio,
@@ -126,10 +137,12 @@ class _AlarmEditScreenState extends State<AddAlarm> {
       assetAudioPath: assetAudio,
       stopOnNotificationOpen: false,
     );
+    print('Full alarm in MM/DD/YY ALARMSETTINGS VARIABLE ${alarmSettings.dateTime.month}/${alarmSettings.dateTime.day}/${alarmSettings.dateTime.year}');
     return alarmSettings;
   }
 
   void saveAlarm() {
+    print('KILL ME ' + buildAlarmSettings().dateTime.toString());
     // Method for saving the generated Alarm
     Alarm.set(alarmSettings: buildAlarmSettings())
         .then((_) => Navigator.pop(context, true));
@@ -200,7 +213,7 @@ class _AlarmEditScreenState extends State<AddAlarm> {
             child: Container(
               margin: const EdgeInsets.all(20),
               child: Text(
-                selectedTime.month.toString() + "/" + selectedTime.day.toString() + "/" + selectedTime.year.toString(),
+                "${selectedTime.month}/${selectedTime.day}/${selectedTime.year}",
                 style: Theme.of(context)
                     .textTheme
                     .displayMedium!
@@ -208,7 +221,6 @@ class _AlarmEditScreenState extends State<AddAlarm> {
               ),
             ),
           ),
-
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             RawMaterialButton(
