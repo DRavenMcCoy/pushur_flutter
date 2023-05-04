@@ -3,7 +3,6 @@ import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:pushur_flutter/_alarm.dart';
 
-import 'settings.dart';
 
 //Much of this is made with the consideration of how the alarm library works, other iterations have been tried prior however other iterations ran into fatal errors (week of progress lost)
 class MyHomePage extends StatefulWidget {
@@ -87,6 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     String temp = '0$minutes';
                     minutes = temp;
                   }
+                  print('Full alarm in MM/DD/YY : HH/MM format ${alarms[index].dateTime.month}/${alarms[index].dateTime.day}/${alarms[index].dateTime.year} : ${alarms[index].dateTime.hour}/${alarms[index].dateTime.minute}');
                   //This will be how every container for each alarm is created
                   //Decides if the alarm needs to be in AM or PM based on if it is after 12
                   if(alarms[index].dateTime.hour > 12) {
@@ -98,6 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Colors.blue[200],
                       child: MaterialButton(
                           child: Text(
+                            'Alarm Date: ${alarms[index].dateTime.month} / ${alarms[index].dateTime.day} / ${alarms[index].dateTime.year}\n'
                             'Alarm Time: ${alarms[index].dateTime.hour - 12}:'
                                 '$minutes PM \nAlarm Name: ${alarms[index]
                                 .notificationTitle}',
@@ -117,6 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Colors.blue[200],
                       child: MaterialButton(
                           child: Text(
+                            'Alarm Date: ${alarms[index].dateTime.month} / ${alarms[index].dateTime.day} / ${alarms[index].dateTime.year}\n'
                             'Alarm Time: ${alarms[index].dateTime.hour}:'
                                 '$minutes PM \nAlarm Name: ${alarms[index]
                                 .notificationTitle}',
@@ -137,6 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Colors.blue[200],
                       child: MaterialButton(
                           child: Text(
+                            'Alarm Date: ${alarms[index].dateTime.month} / ${alarms[index].dateTime.day} / ${alarms[index].dateTime.year}\n'
                             'Alarm Time: 12:'
                                 '$minutes AM \nAlarm Name: ${alarms[index]
                                 .notificationTitle}',
@@ -157,6 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Colors.blue[200],
                       child: MaterialButton(
                           child: Text(
+                            'Alarm Date: ${alarms[index].dateTime.month} / ${alarms[index].dateTime.day} / ${alarms[index].dateTime.year}\n'
                             'Alarm Time: ${alarms[index].dateTime.hour}:'
                                 '$minutes AM \nAlarm Name: ${alarms[index]
                                 .notificationTitle}',
@@ -183,18 +187,6 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.end,
 
           children: <Widget>[
-            FloatingActionButton(
-              onPressed: () async {
-                await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          const SettingsMenu(),
-                    ));
-              },
-              tooltip: 'NextScreen',
-              child: const Icon(Icons.settings),
-            ),
             FloatingActionButton(
               onPressed: () => navigateToAlarmScreen(null),
               tooltip: 'NextScreen',
