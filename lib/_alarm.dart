@@ -15,12 +15,13 @@ class _AlarmEditScreenState extends State<AddAlarm> {
   // Value and important tools declaration
   final nameInputController = TextEditingController();
   late bool creating;
-  late DateTime selectedTime;
+  late TimeOfDay selectedTime;
   late bool loopAudio;
   late bool vibrate;
   late bool showNotification;
   late String assetAudio;
   late String alarmName;
+  late DateTime date;
   late int year = 2023;
   late int month = 5;
   late int day = 4;
@@ -29,7 +30,6 @@ class _AlarmEditScreenState extends State<AddAlarm> {
   late int second = 0;
   late int millisecond = 0;
   late int microsecond = 0;
-  late TimeOfDay hourAndMinute = TimeOfDay(hour: hour, minute: minute);
 
   @override
   void initState() {
@@ -39,16 +39,19 @@ class _AlarmEditScreenState extends State<AddAlarm> {
 
     if (creating) {
       final dt = DateTime.now().add(const Duration(minutes: 1));
-      selectedTime = DateTime(year = dt.year, month = dt.month, day = dt.day,
-          hour = dt.hour, minute = dt.minute, second, millisecond, microsecond);
-      hourAndMinute = TimeOfDay(hour: hour, minute: minute);
-      loopAudio = false;
+      selectedTime = TimeOfDay(hour: dt.hour, minute: dt.minute);
+      date = dt;
+      loopAudio = true;
       vibrate = true;
       showNotification = true;
       assetAudio = 'assets/silence.mp3';
       alarmName = "Example Alarm";
     } else {
-      selectedTime = DateTime(
+      selectedTime = TimeOfDay(
+        hour: widget.alarmSettings!.dateTime.hour,
+        minute: widget.alarmSettings!.dateTime.minute,
+      );
+      date = DateTime(
         year = widget.alarmSettings!.dateTime.year,
         month = widget.alarmSettings!.dateTime.month,
         day = widget.alarmSettings!.dateTime.day,
@@ -68,9 +71,10 @@ class _AlarmEditScreenState extends State<AddAlarm> {
   _setAlarmName() {
     // Method for setting the name of the generated Alarm
     setState(() {
-      if (nameInputController.text == "") {
+      if(nameInputController.text == ""){
         alarmName = "No Name";
-      } else {
+      }
+      else {
         alarmName = nameInputController.text;
       }
     });
@@ -79,21 +83,21 @@ class _AlarmEditScreenState extends State<AddAlarm> {
   Future<void> pickTime() async {
     // Method for setting the timing of the generated Alarm
     final res = await showTimePicker(
-      initialTime: hourAndMinute,
-      context: context,
-    );
-    if (res != null) setState(() => hourAndMinute = res);
-  }
-
-  Future<void> pickDate() async {
-    // Method for setting the timing of the generated Alarm
-    final res = await showDatePicker(
-      initialDate: selectedTime,
-      firstDate: DateTime.now(),
-      lastDate: DateTime(4000, 12, 31),
+      initialTime: selectedTime,
       context: context,
     );
     if (res != null) setState(() => selectedTime = res);
+  }
+
+  Future<void> pickDate() async{
+    //method for setting the timing of the generated alarm
+    final res = await showDatePicker(
+      initialDate: date,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2999, 12, 31),
+      context: context,
+    );
+    if (res != null) setState(() => date = res);
   }
 
   AlarmSettings buildAlarmSettings() {
@@ -102,48 +106,38 @@ class _AlarmEditScreenState extends State<AddAlarm> {
         ? DateTime.now().millisecondsSinceEpoch % 100000
         : widget.alarmSettings!.id;
 
-    print(
-        'Full alarm in MM/DD/YY : HH/MM format ${selectedTime.month}/${selectedTime.day}/${selectedTime.year}');
-
     DateTime dateTime = DateTime(
-      selectedTime.year,
-      selectedTime.month,
-      selectedTime.day,
-      hourAndMinute.hour,
-      hourAndMinute.minute,
-      0,
+      date.year,
+      date.month,
+      date.day,
+      selectedTime.hour,
+      selectedTime.minute,
       0,
       0,
     );
 
-    hourAndMinute = TimeOfDay(hour: hour, minute: minute);
 
     if (dateTime.isBefore(DateTime.now())) {
       // Adding one because the dates are saved to arrays, which start at 0
-      print('DURATION CHANGED');
       dateTime = dateTime.add(const Duration(days: 1));
     }
 
     final alarmSettings = AlarmSettings(
       // Method for finalising the Alarm's settings
-
       id: id,
       dateTime: dateTime,
       loopAudio: loopAudio,
       vibrate: vibrate,
       notificationTitle: showNotification ? alarmName : null,
       notificationBody:
-          showNotification ? 'Your alarm ($alarmName) is ringing' : null,
+      showNotification ? 'Your alarm ($alarmName) is ringing' : null,
       assetAudioPath: assetAudio,
       stopOnNotificationOpen: false,
     );
-    print(
-        'Full alarm in MM/DD/YY ALARMSETTINGS VARIABLE ${alarmSettings.dateTime.month}/${alarmSettings.dateTime.day}/${alarmSettings.dateTime.year}');
     return alarmSettings;
   }
 
   void saveAlarm() {
-    print('KILL ME ' + buildAlarmSettings().dateTime.toString());
     // Method for saving the generated Alarm
     Alarm.set(alarmSettings: buildAlarmSettings())
         .then((_) => Navigator.pop(context, true));
@@ -161,7 +155,6 @@ class _AlarmEditScreenState extends State<AddAlarm> {
     nameInputController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -212,7 +205,7 @@ class _AlarmEditScreenState extends State<AddAlarm> {
             child: Container(
               margin: const EdgeInsets.all(20),
               child: Text(
-                "${selectedTime.month}/${selectedTime.day}/${selectedTime.year}",
+                "${date.month}/${date.day}/${date.year}",
                 style: Theme.of(context)
                     .textTheme
                     .displayMedium!
@@ -228,7 +221,7 @@ class _AlarmEditScreenState extends State<AddAlarm> {
               child: Container(
                 margin: const EdgeInsets.all(20),
                 child: Text(
-                  hourAndMinute.format(context),
+                  selectedTime.format(context),
                   style: Theme.of(context)
                       .textTheme
                       .displayMedium!
